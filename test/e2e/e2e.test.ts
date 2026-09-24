@@ -16,9 +16,7 @@ const shouldUseRecordings = process.env['AUTH0_HTTP_RECORDINGS'] === 'lockdown';
 const AUTH0_DOMAIN = shouldUseRecordings
   ? 'deploy-cli-dev.eu.auth0.com'
   : process.env['AUTH0_E2E_TENANT_DOMAIN'] || '';
-// Public client_id of the dev tenant's "Deploy CLI" app — already present in the
-// committed recordings. Pinned so the self-exclusion in the clients handler fires
-// under lockdown on forks too (forks don't get AUTH0_E2E_CLIENT_ID). Not a secret.
+
 const AUTH0_CLIENT_ID = shouldUseRecordings
   ? 'Vp0gMRF8PtMzekil38qWoj4Fjw2VjRZE'
   : process.env['AUTH0_E2E_CLIENT_ID'] || '';
@@ -406,16 +404,16 @@ describe('keyword preservation', () => {
       },
     });
     const yamlWithoutPreservation = yamlLoad(
-      fs.readFileSync(path.join(workDirectory, 'tenant.yaml'))
+      fs.readFileSync(path.join(workDirectory, 'tenant.yaml')),
     );
     expect(yamlWithoutPreservation.tenant.friendly_name).to.equal(
-      'This tenant name should be preserved'
+      'This tenant name should be preserved',
     );
     expect(yamlWithoutPreservation.tenant.support_email).to.equal('support@travel0.com');
     expect(yamlWithoutPreservation.tenant.support_url).to.equal('https://travel0.com/support');
     expect(
       yamlWithoutPreservation.emailTemplates.find(({ template }) => template === 'welcome_email')
-        .resultUrl
+        .resultUrl,
     ).to.equal('https://travel0.com/welcome');
 
     emptyDirSync(workDirectory);
@@ -433,7 +431,7 @@ describe('keyword preservation', () => {
     expect(yaml.tenant.support_email).to.equal('support@##DOMAIN##');
     expect(yaml.tenant.support_url).to.equal('https://##DOMAIN##/support');
     expect(
-      yaml.emailTemplates.find(({ template }) => template === 'welcome_email').resultUrl
+      yaml.emailTemplates.find(({ template }) => template === 'welcome_email').resultUrl,
     ).to.equal('https://##DOMAIN##/welcome');
 
     expect(yaml.tenant.enabled_locales).to.equal('@@LANGUAGES@@');
@@ -446,8 +444,8 @@ describe('keyword preservation', () => {
     expect(
       yaml.clients.some(
         ({ name, logo_uri }) =>
-          name === 'Auth0 CLI - ##ENV##' && logo_uri === 'https://##ENV##.assets.com/photos/foo'
-      )
+          name === 'Auth0 CLI - ##ENV##' && logo_uri === 'https://##ENV##.assets.com/photos/foo',
+      ),
     ).to.be.true;
 
     recordingDone();
@@ -474,42 +472,42 @@ describe('keyword preservation', () => {
     });
 
     const jsonWithoutPreservation = JSON.parse(
-      fs.readFileSync(path.join(workDirectory, 'tenant.json')).toString()
+      fs.readFileSync(path.join(workDirectory, 'tenant.json')).toString(),
     );
 
     expect(jsonWithoutPreservation.friendly_name).to.equal(
-      config.AUTH0_KEYWORD_REPLACE_MAPPINGS.TENANT_NAME
+      config.AUTH0_KEYWORD_REPLACE_MAPPINGS.TENANT_NAME,
     );
     expect(jsonWithoutPreservation.enabled_locales).to.deep.equal(
-      config.AUTH0_KEYWORD_REPLACE_MAPPINGS.LANGUAGES
+      config.AUTH0_KEYWORD_REPLACE_MAPPINGS.LANGUAGES,
     );
     expect(jsonWithoutPreservation.support_email).to.equal(
-      `support@${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.DOMAIN}`
+      `support@${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.DOMAIN}`,
     );
     expect(jsonWithoutPreservation.support_url).to.equal(
-      `https://${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.DOMAIN}/support`
+      `https://${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.DOMAIN}/support`,
     );
 
     const emailTemplateJsonWithoutPreservation = JSON.parse(
-      fs.readFileSync(path.join(workDirectory, 'emails', 'welcome_email.json')).toString()
+      fs.readFileSync(path.join(workDirectory, 'emails', 'welcome_email.json')).toString(),
     );
 
     expect(emailTemplateJsonWithoutPreservation.resultUrl).to.equal(
-      `https://${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.DOMAIN}/welcome`
+      `https://${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.DOMAIN}/welcome`,
     );
 
     expect(
-      fs.readFileSync(path.join(workDirectory, 'emails', 'welcome_email.html')).toString()
+      fs.readFileSync(path.join(workDirectory, 'emails', 'welcome_email.html')).toString(),
     ).to.contain(config.AUTH0_KEYWORD_REPLACE_MAPPINGS.TENANT_NAME);
 
     const clientsJsonWithoutPreservation = JSON.parse(
-      fs.readFileSync(path.join(workDirectory, 'clients', 'Auth0 CLI - dev.json')).toString()
+      fs.readFileSync(path.join(workDirectory, 'clients', 'Auth0 CLI - dev.json')).toString(),
     );
     expect(clientsJsonWithoutPreservation.name).to.equal(
-      `Auth0 CLI - ${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.ENV}`
+      `Auth0 CLI - ${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.ENV}`,
     );
     expect(clientsJsonWithoutPreservation.logo_uri).to.equal(
-      `https://${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.ENV}.assets.com/photos/foo`
+      `https://${config.AUTH0_KEYWORD_REPLACE_MAPPINGS.ENV}.assets.com/photos/foo`,
     );
 
     emptyDirSync(workDirectory);
@@ -530,7 +528,7 @@ describe('keyword preservation', () => {
     expect(json.support_url).to.equal('https://##DOMAIN##/support');
 
     const emailTemplateJson = JSON.parse(
-      fs.readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.json')).toString()
+      fs.readFileSync(path.join(workDirectory, 'emailTemplates', 'welcome_email.json')).toString(),
     );
 
     expect(emailTemplateJson.resultUrl).to.equal('https://##DOMAIN##/welcome');
@@ -542,7 +540,7 @@ describe('keyword preservation', () => {
     expect(emailTemplateHTML).to.contain('##TENANT_NAME##');
 
     const clientsJSON = JSON.parse(
-      fs.readFileSync(path.join(workDirectory, 'clients', 'Auth0 CLI - dev.json')).toString()
+      fs.readFileSync(path.join(workDirectory, 'clients', 'Auth0 CLI - dev.json')).toString(),
     );
     expect(clientsJSON.name).to.equal('Auth0 CLI - ##ENV##');
     expect(clientsJSON.logo_uri).to.equal('https://##ENV##.assets.com/photos/foo');
@@ -562,7 +560,7 @@ describe('keyword preservation', () => {
       });
     } catch (err) {
       expect(err.message).to.contain(
-        'Attempting to preserve keywords without defining keyword mappings. Doing so could result in unintentional overwriting of resource configurations. Either define keyword mappings via AUTH0_KEYWORD_REPLACE_MAPPINGS or disable AUTH0_PRESERVE_KEYWORDS.'
+        'Attempting to preserve keywords without defining keyword mappings. Doing so could result in unintentional overwriting of resource configurations. Either define keyword mappings via AUTH0_KEYWORD_REPLACE_MAPPINGS or disable AUTH0_PRESERVE_KEYWORDS.',
       );
       return;
     }
@@ -581,7 +579,7 @@ describe('keyword preservation', () => {
       throw new Error("The above should've thrown an exception");
     } catch (err) {
       expect(err.message).to.contain(
-        'Attempting to preserve keywords without defining keyword mappings. Doing so could result in unintentional overwriting of resource configurations. Either define keyword mappings via AUTH0_KEYWORD_REPLACE_MAPPINGS or disable AUTH0_PRESERVE_KEYWORDS.'
+        'Attempting to preserve keywords without defining keyword mappings. Doing so could result in unintentional overwriting of resource configurations. Either define keyword mappings via AUTH0_KEYWORD_REPLACE_MAPPINGS or disable AUTH0_PRESERVE_KEYWORDS.',
       );
     }
 
@@ -593,7 +591,7 @@ describe('keyword preservation', () => {
       });
     } catch (err) {
       expect(err.message).to.contain(
-        'Attempting to preserve keywords without defining keyword mappings. Doing so could result in unintentional overwriting of resource configurations. Either define keyword mappings via AUTH0_KEYWORD_REPLACE_MAPPINGS or disable AUTH0_PRESERVE_KEYWORDS.'
+        'Attempting to preserve keywords without defining keyword mappings. Doing so could result in unintentional overwriting of resource configurations. Either define keyword mappings via AUTH0_KEYWORD_REPLACE_MAPPINGS or disable AUTH0_PRESERVE_KEYWORDS.',
       );
       return;
     }
